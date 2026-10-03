@@ -573,6 +573,8 @@ export interface ChordInversion {
   notes: string[];
   bass: string;
   description: string;
+  inversionName?: string;
+  bassNote?: string;
 }
 
 export function getChordInversions(chordName: string, notes: string[]): ChordInversion[] {
@@ -580,20 +582,26 @@ export function getChordInversions(chordName: string, notes: string[]): ChordInv
     return [
       {
         name: 'Estado Fundamental',
+        inversionName: 'Fundamental',
         notes: [...notes],
         bass: notes[0],
+        bassNote: notes[0],
         description: `Tônica no baixo (${notes[0]}). Som mais estável e fundamental.`,
       },
       {
         name: '1ª Inversão (Baixo na 3ª)',
+        inversionName: '1ª Inversão',
         notes: [notes[1], notes[2], notes[0]],
         bass: notes[1],
+        bassNote: notes[1],
         description: `Terça no baixo (${notes[1]}). Proporciona condução melódica mais suave no baixo.`,
       },
       {
         name: '2ª Inversão (Baixo na 5ª)',
+        inversionName: '2ª Inversão',
         notes: [notes[2], notes[0], notes[1]],
         bass: notes[2],
+        bassNote: notes[2],
         description: `Quinta no baixo (${notes[2]}). Soa suspenso e dinâmico, comum em cadências.`,
       },
     ];
@@ -601,26 +609,34 @@ export function getChordInversions(chordName: string, notes: string[]): ChordInv
     return [
       {
         name: 'Estado Fundamental',
+        inversionName: 'Fundamental',
         notes: [...notes],
         bass: notes[0],
+        bassNote: notes[0],
         description: `Tônica no baixo (${notes[0]}). Estabilidade total.`,
       },
       {
         name: '1ª Inversão (Baixo na 3ª)',
+        inversionName: '1ª Inversão',
         notes: [notes[1], notes[2], notes[3], notes[0]],
         bass: notes[1],
+        bassNote: notes[1],
         description: `Terça no baixo (${notes[1]}). Condução de voz elegante.`,
       },
       {
         name: '2ª Inversão (Baixo na 5ª)',
+        inversionName: '2ª Inversão',
         notes: [notes[2], notes[3], notes[0], notes[1]],
         bass: notes[2],
+        bassNote: notes[2],
         description: `Quinta no baixo (${notes[2]}).`,
       },
       {
         name: '3ª Inversão (Baixo na 7ª)',
+        inversionName: '3ª Inversão',
         notes: [notes[3], notes[0], notes[1], notes[2]],
         bass: notes[3],
+        bassNote: notes[3],
         description: `Sétima no baixo (${notes[3]}). Alta tensão direcional para resolução um semitom abaixo.`,
       },
     ];

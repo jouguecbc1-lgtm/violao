@@ -17,6 +17,7 @@ import { Escalas } from './pages/Escalas';
 import { Acordes } from './pages/Acordes';
 import { Progressoes } from './pages/Progressoes';
 import { Progressao251 } from './pages/Progressao251';
+import { GuiaInstrumentos } from './pages/GuiaInstrumentos';
 import { Transpositor } from './pages/Transpositor';
 import { Simulador } from './pages/Simulador';
 import { Exercicios } from './pages/Exercicios';
@@ -28,6 +29,11 @@ import { Dicionario } from './pages/Dicionario';
 import { CirculoQuintasPage } from './pages/CirculoQuintasPage';
 import { Configuracoes } from './pages/Configuracoes';
 import { ModoPratica } from './pages/ModoPratica';
+import { LaboratorioHarmonia } from './pages/LaboratorioHarmonia';
+import { VoiceLeadingPage } from './pages/VoiceLeadingPage';
+import { Rearmonizador } from './pages/Rearmonizador';
+import { PainelProfessor } from './pages/PainelProfessor';
+import { PerfilAluno } from './pages/PerfilAluno';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<NavPage>('dashboard');
@@ -98,6 +104,8 @@ export default function App() {
           }}
           streakDays={stats.streakDays}
           studentName={stats.studentName}
+          preferredInstrument={stats.preferredInstrument}
+          onSelectInstrument={(inst) => handleUpdateStats({ ...stats, preferredInstrument: inst })}
         />
 
         {/* Floating Quick Metronome Panel */}
@@ -117,6 +125,7 @@ export default function App() {
               stats={stats}
               onNavigate={(p, param) => handleNavigate(p, param)}
               onOpenCertificate={() => setIsCertificateOpen(true)}
+              onSelectInstrument={(inst) => handleUpdateStats({ ...stats, preferredInstrument: inst })}
             />
           )}
 
@@ -132,12 +141,15 @@ export default function App() {
           {currentPage === 'campo_harmonico' && (
             <CampoHarmonico
               onNavigateTo251={(key) => handleNavigate('2-5-1', key)}
+              userInstrument={stats.preferredInstrument}
             />
           )}
 
           {currentPage === 'escalas' && <Escalas />}
 
-          {currentPage === 'acordes' && <Acordes />}
+          {currentPage === 'acordes' && (
+            <Acordes userInstrument={stats.preferredInstrument} />
+          )}
 
           {currentPage === 'progressoes' && (
             <Progressoes
@@ -153,7 +165,12 @@ export default function App() {
               onNavigateToTransposer={(prog, fromKey) => {
                 handleNavigate('transposicao', JSON.stringify({ prog, fromKey }));
               }}
+              userInstrument={stats.preferredInstrument}
             />
+          )}
+
+          {currentPage === 'instrumentos' && (
+            <GuiaInstrumentos userInstrument={stats.preferredInstrument} />
           )}
 
           {currentPage === 'transposicao' && (
@@ -227,6 +244,28 @@ export default function App() {
           )}
 
           {currentPage === 'pratica' && <ModoPratica />}
+
+          {currentPage === 'laboratorio' && (
+            <LaboratorioHarmonia
+              initialKey={pageParam || 'C'}
+              userInstrument={stats.preferredInstrument}
+              onNavigate={(page, param) => handleNavigate(page as NavPage, param)}
+            />
+          )}
+
+          {currentPage === 'voice_leading' && <VoiceLeadingPage />}
+
+          {currentPage === 'rearmonizador' && <Rearmonizador />}
+
+          {currentPage === 'professor' && <PainelProfessor />}
+
+          {currentPage === 'perfil' && (
+            <PerfilAluno
+              stats={stats}
+              onUpdateStats={handleUpdateStats}
+              onOpenCertificate={() => setIsCertificateOpen(true)}
+            />
+          )}
         </main>
       </div>
 

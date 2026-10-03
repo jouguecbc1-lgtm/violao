@@ -13,9 +13,12 @@ import {
   HelpCircle,
   Sparkles,
 } from 'lucide-react';
-import { Lesson, UserStats } from '../types';
+import { Lesson, UserStats, Instrument } from '../types';
 import { COURSE_LESSONS } from '../data/courseData';
 import { audioSynth } from '../services/audioSynth';
+import { PianoKeyboard } from '../components/PianoKeyboard';
+import { FretboardDiagram } from '../components/FretboardDiagram';
+import { BassFretboard } from '../components/BassFretboard';
 
 interface CursoProps {
   stats: UserStats;
@@ -36,6 +39,15 @@ export const Curso: React.FC<CursoProps> = ({
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [selectedExerciseOption, setSelectedExerciseOption] = useState<number | null>(null);
   const [exerciseSubmitted, setExerciseSubmitted] = useState(false);
+  const [lessonInstrumentView, setLessonInstrumentView] = useState<Instrument>(
+    stats.preferredInstrument || 'violao'
+  );
+
+  React.useEffect(() => {
+    if (stats.preferredInstrument) {
+      setLessonInstrumentView(stats.preferredInstrument);
+    }
+  }, [stats.preferredInstrument]);
 
   // Sync if prop changes
   React.useEffect(() => {
@@ -278,11 +290,11 @@ export const Curso: React.FC<CursoProps> = ({
             </div>
 
             {/* Practical Application on Instrument */}
-            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 sm:p-5 space-y-3">
-              <div className="flex items-center justify-between">
+            <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 sm:p-5 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4" />
-                  Aplicação Prática no Instrumento ({currentLesson.practicalApplication.instrument})
+                  Aplicação Prática nos 4 Instrumentos
                 </span>
 
                 {currentLesson.practicalApplication.chordsOrNotes && (
@@ -297,7 +309,7 @@ export const Curso: React.FC<CursoProps> = ({
                         );
                       }
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold rounded-lg transition-colors self-start sm:self-auto"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                     <span>Ouvir Exemplo</span>
@@ -305,12 +317,56 @@ export const Curso: React.FC<CursoProps> = ({
                 )}
               </div>
 
+              {/* General Lesson Instructions */}
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {currentLesson.practicalApplication.instructions}
               </p>
 
+              {/* 4 Instruments Specific Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2">
+                {/* Violão */}
+                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs space-y-1">
+                  <span className="font-bold text-amber-400 flex items-center gap-1 text-[11px] uppercase">
+                    <span>🎸 Violão</span>
+                  </span>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Polegar marca o baixo na 5ª ou 6ª corda; dedos I-M-A tocam as cordas primárias com pestana ou abertas.
+                  </p>
+                </div>
+
+                {/* Guitarra */}
+                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs space-y-1">
+                  <span className="font-bold text-amber-400 flex items-center gap-1 text-[11px] uppercase">
+                    <span>⚡ Guitarra</span>
+                  </span>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Voicings Drop 2 e Shell Voicings sem a 5ª; economiza espaço sônico para não colidir com o teclado.
+                  </p>
+                </div>
+
+                {/* Baixo */}
+                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs space-y-1">
+                  <span className="font-bold text-amber-400 flex items-center gap-1 text-[11px] uppercase">
+                    <span>🎸 Contrabaixo</span>
+                  </span>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Marcação sólida da Fundamental no tempo forte, arpejando a 3ª e a 5ª com aproximação cromática.
+                  </p>
+                </div>
+
+                {/* Teclado */}
+                <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs space-y-1">
+                  <span className="font-bold text-amber-400 flex items-center gap-1 text-[11px] uppercase">
+                    <span>🎹 Teclado</span>
+                  </span>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">
+                    Mão esquerda no baixo (Root), mão direita nas Notas Guia (3ª e 7ª). Resolução suave por semitom.
+                  </p>
+                </div>
+              </div>
+
               {currentLesson.practicalApplication.chordsOrNotes && (
-                <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 font-mono text-xs">
                   <span className="text-slate-400">Notas / Acordes:</span>
                   {currentLesson.practicalApplication.chordsOrNotes.map((item) => (
                     <span
@@ -322,6 +378,104 @@ export const Curso: React.FC<CursoProps> = ({
                       {item}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {/* Interactive Instrument Visualizer for Current Lesson */}
+              {currentLesson.practicalApplication.chordsOrNotes && currentLesson.practicalApplication.chordsOrNotes.length > 0 && (
+                <div className="pt-3 border-t border-slate-800 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-slate-300">
+                      Visualizar no Instrumento:
+                    </span>
+                    <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setLessonInstrumentView('violao')}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                          lessonInstrumentView === 'violao'
+                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        🎸 Violão
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLessonInstrumentView('guitarra')}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                          lessonInstrumentView === 'guitarra'
+                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        ⚡ Guitarra
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLessonInstrumentView('baixo')}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                          lessonInstrumentView === 'baixo'
+                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        🎸 Baixo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLessonInstrumentView('teclado')}
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                          lessonInstrumentView === 'teclado'
+                            ? 'bg-amber-500 text-slate-950 font-bold'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        🎹 Teclado
+                      </button>
+                    </div>
+                  </div>
+
+                  {lessonInstrumentView === 'teclado' && (
+                    <div className="pt-1">
+                      <PianoKeyboard
+                        highlightNotes={currentLesson.practicalApplication.chordsOrNotes}
+                        bassNote={currentLesson.practicalApplication.chordsOrNotes[0]}
+                        octaves={2}
+                      />
+                    </div>
+                  )}
+
+                  {lessonInstrumentView === 'violao' && (
+                    <div className="flex justify-center pt-1">
+                      <FretboardDiagram
+                        chordName={currentLesson.practicalApplication.chordsOrNotes[0]}
+                        notes={currentLesson.practicalApplication.chordsOrNotes}
+                        instrument="violao"
+                      />
+                    </div>
+                  )}
+
+                  {lessonInstrumentView === 'guitarra' && (
+                    <div className="flex justify-center pt-1">
+                      <FretboardDiagram
+                        chordName={currentLesson.practicalApplication.chordsOrNotes[0]}
+                        notes={currentLesson.practicalApplication.chordsOrNotes}
+                        instrument="guitarra"
+                      />
+                    </div>
+                  )}
+
+                  {lessonInstrumentView === 'baixo' && (
+                    <div className="pt-1">
+                      <BassFretboard
+                        chordName={currentLesson.title}
+                        rootNote={currentLesson.practicalApplication.chordsOrNotes[0]}
+                        chordNotes={currentLesson.practicalApplication.chordsOrNotes}
+                        stringsCount={4}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

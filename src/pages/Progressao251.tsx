@@ -9,29 +9,61 @@ import {
   Layers,
   ArrowDown,
   Repeat,
+  Music,
 } from 'lucide-react';
 import { KEY_LIST, get251, getChordInversions } from '../utils/musicTheory';
+import { Instrument } from '../types';
 import { audioSynth } from '../services/audioSynth';
 import { PianoKeyboard } from '../components/PianoKeyboard';
 import { FretboardDiagram } from '../components/FretboardDiagram';
+import { BassFretboard } from '../components/BassFretboard';
 
 interface Progressao251Props {
   initialKey?: string;
   onNavigateToTransposer?: (prog: string[], fromKey: string) => void;
+  userInstrument?: Instrument;
 }
 
 export const Progressao251: React.FC<Progressao251Props> = ({
   initialKey = 'C',
   onNavigateToTransposer,
+  userInstrument = 'violao',
 }) => {
   const [selectedKey, setSelectedKey] = useState<string>(initialKey);
   const [mode, setMode] = useState<'major' | 'minor'>('major');
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [selectedInstrumentTab, setSelectedInstrumentTab] = useState<'piano' | 'violao'>('piano');
+  const [selectedInstrumentTab, setSelectedInstrumentTab] = useState<'teclado' | 'violao' | 'guitarra' | 'baixo'>(
+    userInstrument || 'violao'
+  );
   const [selectedInversionChord, setSelectedInversionChord] = useState<'ii' | 'V' | 'I'>('ii');
 
+  React.useEffect(() => {
+    if (userInstrument) {
+      setSelectedInstrumentTab(userInstrument);
+    }
+  }, [userInstrument]);
+
   const twoFiveOne = get251(selectedKey, mode);
+
+  // Generate dynamic walking bass line for the 2-5-1
+  const walkingBassProgression = [
+    // Over II (4 quarter notes: Root -> 3rd -> 5th -> Chromatic Approach to V)
+    twoFiveOne.ii.notes[0],
+    twoFiveOne.ii.notes[1],
+    twoFiveOne.ii.notes[2],
+    twoFiveOne.V.notes[0] === 'G' ? 'F#' : twoFiveOne.V.notes[0],
+    // Over V (Root -> 3rd -> 5th -> Chromatic Approach to I)
+    twoFiveOne.V.notes[0],
+    twoFiveOne.V.notes[1],
+    twoFiveOne.V.notes[2],
+    twoFiveOne.I.notes[0] === 'C' ? 'B' : twoFiveOne.I.notes[0],
+    // Over I (Root -> 3rd -> 5th -> 7th)
+    twoFiveOne.I.notes[0],
+    twoFiveOne.I.notes[1],
+    twoFiveOne.I.notes[2],
+    twoFiveOne.I.notes[3],
+  ];
 
   // Play the 2-5-1 progression with step animation callback
   const handlePlayProgression = () => {
@@ -302,46 +334,80 @@ export const Progressao251: React.FC<Progressao251Props> = ({
         </div>
       </div>
 
-      {/* Piano & Guitar Voicings Section */}
+      {/* 4 Instruments Voicings & Bass Section */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
           <div>
-            <h3 className="text-lg font-bold text-slate-100">
-              Aplicação nos Instrumentos: Voicings de 2-5-1
+            <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+              <Music className="w-5 h-5 text-amber-400" />
+              <span>O 2-5-1 nos 4 Instrumentos: Teclado, Violão, Guitarra e Baixo</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Veja a digitação no teclado e os diagramas com cordas e trastes no violão/guitarra
+              Adaptações práticas de digitação, voicings e condução específicas para o seu instrumento
             </p>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
             <button
               type="button"
-              onClick={() => setSelectedInstrumentTab('piano')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                selectedInstrumentTab === 'piano'
-                  ? 'bg-amber-500 text-slate-950 font-bold'
+              onClick={() => setSelectedInstrumentTab('teclado')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+                selectedInstrumentTab === 'teclado'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Piano / Teclado
+              <span>🎹 Teclado</span>
             </button>
             <button
               type="button"
               onClick={() => setSelectedInstrumentTab('violao')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
                 selectedInstrumentTab === 'violao'
-                  ? 'bg-amber-500 text-slate-950 font-bold'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Violão / Guitarra
+              <span>🎸 Violão</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedInstrumentTab('guitarra')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+                selectedInstrumentTab === 'guitarra'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>⚡ Guitarra</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedInstrumentTab('baixo')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+                selectedInstrumentTab === 'baixo'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span>🎸 Contrabaixo</span>
             </button>
           </div>
         </div>
 
-        {selectedInstrumentTab === 'piano' ? (
+        {/* 1. TECLADO / PIANO */}
+        {selectedInstrumentTab === 'teclado' && (
           <div className="space-y-6">
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
+              <strong className="text-amber-400 block mb-1">
+                Conceito para Teclado (Notas Guia / Voicing Rootless):
+              </strong>
+              Na mão esquerda, toque a nota fundamental do baixo ({twoFiveOne.ii.pianoGuideVoicing.bass} →{' '}
+              {twoFiveOne.V.pianoGuideVoicing.bass} → {twoFiveOne.I.pianoGuideVoicing.bass}). Na mão direita, toque
+              as notas guia (3ª e 7ª). A 7ª sempre desce meio tom para a 3ª do próximo acorde, garantindo uma
+              condução profissional e sem saltos desajeitados.
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Piano II */}
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
@@ -425,11 +491,67 @@ export const Progressao251: React.FC<Progressao251Props> = ({
               </div>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FretboardDiagram chordName={twoFiveOne.ii.chord} notes={twoFiveOne.ii.notes} />
-            <FretboardDiagram chordName={twoFiveOne.V.chord} notes={twoFiveOne.V.notes} />
-            <FretboardDiagram chordName={twoFiveOne.I.chord} notes={twoFiveOne.I.notes} />
+        )}
+
+        {/* 2. VIOLÃO */}
+        {selectedInstrumentTab === 'violao' && (
+          <div className="space-y-6">
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
+              <strong className="text-amber-400 block mb-1">
+                Conceito para Violão (Posições Abertas e Pestanas com Dedilhado P-I-M-A):
+              </strong>
+              No violão acústico clássico e popular (Bossa Nova, Choro e MPB), o polegar (P) comanda a corda do
+              baixo enquanto os dedos Indicador (I), Médio (M) e Anelar (A) beliscam as cordas médias e agudas
+              simultaneamente.
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FretboardDiagram chordName={twoFiveOne.ii.chord} notes={twoFiveOne.ii.notes} instrument="violao" />
+              <FretboardDiagram chordName={twoFiveOne.V.chord} notes={twoFiveOne.V.notes} instrument="violao" />
+              <FretboardDiagram chordName={twoFiveOne.I.chord} notes={twoFiveOne.I.notes} instrument="violao" />
+            </div>
+          </div>
+        )}
+
+        {/* 3. GUITARRA */}
+        {selectedInstrumentTab === 'guitarra' && (
+          <div className="space-y-6">
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
+              <strong className="text-amber-400 block mb-1">
+                Conceito para Guitarra Elétrica (Shell Voicings e Drop 2):
+              </strong>
+              Na guitarra jazzística e moderna, omitir a 5ª e dobrar a 3ª ou 7ª (Shell Voicing) evita embolar com
+              o contrabaixo e teclado. O Drop 2 organiza as notas na 5ª e 4ª cordas com condução cromática perfeita.
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FretboardDiagram chordName={twoFiveOne.ii.chord} notes={twoFiveOne.ii.notes} instrument="guitarra" />
+              <FretboardDiagram chordName={twoFiveOne.V.chord} notes={twoFiveOne.V.notes} instrument="guitarra" />
+              <FretboardDiagram chordName={twoFiveOne.I.chord} notes={twoFiveOne.I.notes} instrument="guitarra" />
+            </div>
+          </div>
+        )}
+
+        {/* 4. CONTRABAIXO */}
+        {selectedInstrumentTab === 'baixo' && (
+          <div className="space-y-6">
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
+              <strong className="text-amber-400 block mb-1">
+                Conceito para Contrabaixo (Fundamental, Arpejos e Walking Bass):
+              </strong>
+              O contrabaixista é o arquiteto da harmonia. No tempo 1 do compasso, toque a Fundamental (Root).
+              Nos tempos seguintes, caminhe pela 3ª, 5ª e faça aproximações cromáticas de meio tom para pousar
+              com firmeza na tônica do próximo acorde.
+            </div>
+
+            {/* Bass Fretboard for the 2-5-1 */}
+            <BassFretboard
+              chordName={`Progressão II-V-I em ${selectedKey}`}
+              rootNote={twoFiveOne.ii.notes[0]}
+              chordNotes={[...twoFiveOne.ii.notes, ...twoFiveOne.V.notes, ...twoFiveOne.I.notes]}
+              walkingLine={walkingBassProgression}
+              stringsCount={4}
+            />
           </div>
         )}
       </div>

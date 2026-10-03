@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, Search, Volume2, VolumeX, Flame, Activity } from 'lucide-react';
 import { NavPage } from './Sidebar';
+import { Instrument } from '../types';
 
 interface NavbarProps {
   currentPage: NavPage;
@@ -11,24 +12,32 @@ interface NavbarProps {
   onVolumeToggle: () => void;
   streakDays: number;
   studentName: string;
+  preferredInstrument?: Instrument;
+  onSelectInstrument?: (instrument: Instrument) => void;
 }
 
 const PAGE_TITLES: Record<NavPage, { title: string; subtitle: string }> = {
   dashboard: { title: 'Dashboard', subtitle: 'Visão geral e progresso dos seus estudos' },
+  laboratorio: { title: 'Laboratório de Harmonia', subtitle: 'Estúdio interativo com teclado, braço, metrônomo e análise' },
   curso: { title: 'Curso Completo', subtitle: 'Aulas teóricas e práticas passo a passo' },
   campo_harmonico: { title: 'Campo Harmônico', subtitle: 'Tabela interativa e gerador em 12 tonalidades' },
   escalas: { title: 'Escalas Musicais', subtitle: 'Fórmula intervalar, modos e visualização' },
   acordes: { title: 'Formação de Acordes', subtitle: 'Tríades, tétrades e inversões completas' },
   progressoes: { title: 'Biblioteca de Progressões', subtitle: 'Cadências clássicas, Jazz, Gospel e Bossa Nova' },
   '2-5-1': { title: 'Especial II – V – I', subtitle: 'A progressão mais importante da música moderna' },
+  voice_leading: { title: 'Voice Leading & SubV', subtitle: 'Condução melódica de vozes e substitutos por trítono' },
+  rearmonizador: { title: 'Rearmonizador Musical', subtitle: 'Transforme progressões simples em arranjos Jazz, Gospel e Neo-Soul' },
+  instrumentos: { title: 'Os 4 Instrumentos', subtitle: 'Aplicação prática para Violão, Guitarra, Baixo e Teclado' },
   transposicao: { title: 'Transpositor Musical', subtitle: 'Transponha acordes e progressões em semitons ou tonalidades' },
   simulador: { title: 'Simulador Harmônico', subtitle: 'Monte progressões personalizadas e toque com áudio' },
-  exercicios: { title: 'Exercícios Práticos', subtitle: 'Identifique acordes, graus e complete cadências' },
+  exercicios: { title: 'Exercícios Práticos', subtitle: 'Gerador infinito, treino de ouvido e reconhecimento de funções' },
   quiz: { title: 'Quiz de Harmonia', subtitle: 'Teste seu conhecimento em 3 níveis de dificuldade' },
-  treinamento: { title: 'Treinamento Rápido & Percepção', subtitle: 'Flashcards e treino de percepção auditiva' },
-  progresso: { title: 'Meu Progresso & Certificado', subtitle: 'Estatísticas, conquistas e emissão do certificado' },
+  treinamento: { title: 'Treinamento & Repetição Espaçada', subtitle: 'Treino diário inteligente focado nas suas maiores dúvidas' },
+  progresso: { title: 'Meu Progresso & Metas', subtitle: 'Estatísticas, radar de domínio musical e metas semanais' },
   anotacoes: { title: 'Bloco de Anotações', subtitle: 'Seu caderno pessoal de teoria musical' },
   circulo_quintas: { title: 'Círculo das Quintas', subtitle: 'Visualização interativa das 12 tonalidades' },
+  professor: { title: 'Painel do Professor', subtitle: 'Gerenciamento de turmas, alunos e diagnósticos de aprendizagem' },
+  perfil: { title: 'Perfil do Aluno', subtitle: 'Configurações de instrumento, metas e nível musical' },
   dicionario: { title: 'Dicionário Musical', subtitle: 'Glossário completo de termos harmônicos' },
   configuracoes: { title: 'Configurações', subtitle: 'Preferências, backup e dados' },
   pratica: { title: 'Modo Prática Rápida', subtitle: 'Foco total com metrônomo e acordes grandes' },
@@ -43,8 +52,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onVolumeToggle,
   streakDays,
   studentName,
+  preferredInstrument = 'violao',
+  onSelectInstrument,
 }) => {
   const pageInfo = PAGE_TITLES[currentPage] || { title: 'Harmonia 2-5-1', subtitle: 'Curso de Harmonia' };
+
+  const instrumentsList: { id: Instrument; label: string; icon: string }[] = [
+    { id: 'violao', label: 'Violão', icon: '🎸' },
+    { id: 'guitarra', label: 'Guitarra', icon: '⚡' },
+    { id: 'baixo', label: 'Baixo', icon: '🎸' },
+    { id: 'teclado', label: 'Teclado', icon: '🎹' },
+  ];
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between">
@@ -71,6 +89,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-2">
+        {/* Quick Instrument Selector */}
+        {onSelectInstrument && (
+          <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5" title="Seu instrumento ativo">
+            {instrumentsList.map((inst) => {
+              const active = preferredInstrument === inst.id;
+              return (
+                <button
+                  key={inst.id}
+                  type="button"
+                  onClick={() => onSelectInstrument(inst.id)}
+                  className={`flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+                    active
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>{inst.icon}</span>
+                  <span className="hidden lg:inline">{inst.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Global Search Trigger */}
         <button
           type="button"

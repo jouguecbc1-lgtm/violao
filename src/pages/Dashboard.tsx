@@ -12,8 +12,11 @@ import {
   CheckCircle2,
   Clock,
   Flame,
+  BarChart3,
+  Target,
+  Volume2,
 } from 'lucide-react';
-import { UserStats } from '../types';
+import { UserStats, Instrument } from '../types';
 import { COURSE_LESSONS } from '../data/courseData';
 import { audioSynth } from '../services/audioSynth';
 import { NavPage } from '../components/Sidebar';
@@ -22,12 +25,14 @@ interface DashboardProps {
   stats: UserStats;
   onNavigate: (page: NavPage, param?: string) => void;
   onOpenCertificate: () => void;
+  onSelectInstrument?: (inst: Instrument) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   stats,
   onNavigate,
   onOpenCertificate,
+  onSelectInstrument,
 }) => {
   const totalLessons = COURSE_LESSONS.length;
   const completedCount = stats.completedLessonIds.length;
@@ -87,23 +92,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => onNavigate('curso', nextLesson.id)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-95"
+              onClick={() => onNavigate('laboratorio')}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-amber-500/30 active:scale-95"
             >
-              <Play className="w-4 h-4 fill-current" />
-              <span>Continuar: Aula {nextLesson.lessonNumber}</span>
+              <Sparkles className="w-4 h-4 fill-current" />
+              <span>⭐ Laboratório de Harmonia</span>
             </button>
 
             <button
               type="button"
-              onClick={() => {
-                onNavigate('2-5-1');
-                audioSynth.playProgression([['D', 'F', 'A', 'C'], ['G', 'B', 'D', 'F'], ['C', 'E', 'G', 'B']], 80);
-              }}
+              onClick={() => onNavigate('curso', nextLesson.id)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm rounded-xl transition-all border border-slate-700 active:scale-95"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              <span>Aula {nextLesson.lessonNumber}: {nextLesson.title}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onNavigate('2-5-1')}
               className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm rounded-xl border border-slate-700 transition-all active:scale-95"
             >
               <Zap className="w-4 h-4 text-amber-400" />
-              <span>Explorar o 2-5-1 Interativo</span>
+              <span>Especial 2-5-1</span>
             </button>
           </div>
         </div>
@@ -174,10 +185,174 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
+      {/* Applied Instruments Feature Section */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
+              <Sparkles className="w-4 h-4" />
+              <span>Teoria Aplicada ao Instrumento</span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-100">
+              Curso Voltado para: Violão, Guitarra, Baixo e Teclado
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Selecione seu instrumento principal para personalizar a visualização de acordes e diagramas:
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('instrumentos')}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition-colors self-start sm:self-auto"
+          >
+            <span>Guia dos 4 Instrumentos</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* 4 Interactive Instrument Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* 1. Violão */}
+          <div
+            onClick={() => onSelectInstrument && onSelectInstrument('violao')}
+            className={`cursor-pointer rounded-xl p-4 border transition-all ${
+              stats.preferredInstrument === 'violao'
+                ? 'bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50'
+                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-lg">🎸</span>
+              {stats.preferredInstrument === 'violao' && (
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                  Ativo
+                </span>
+              )}
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Violão Acústico</h3>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              Posições abertas e pestanas, dedilhados (P-I-M-A) e levadas rítmicas de Bossa Nova e MPB.
+            </p>
+          </div>
+
+          {/* 2. Guitarra */}
+          <div
+            onClick={() => onSelectInstrument && onSelectInstrument('guitarra')}
+            className={`cursor-pointer rounded-xl p-4 border transition-all ${
+              stats.preferredInstrument === 'guitarra'
+                ? 'bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50'
+                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-lg">⚡</span>
+              {stats.preferredInstrument === 'guitarra' && (
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                  Ativo
+                </span>
+              )}
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Guitarra Elétrica</h3>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              Voicings Drop 2, Shell Voicings (1-3-7) nas 4 cordas, sistema CAGED e condução jazzística.
+            </p>
+          </div>
+
+          {/* 3. Baixo */}
+          <div
+            onClick={() => onSelectInstrument && onSelectInstrument('baixo')}
+            className={`cursor-pointer rounded-xl p-4 border transition-all ${
+              stats.preferredInstrument === 'baixo'
+                ? 'bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50'
+                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-lg">🎸</span>
+              {stats.preferredInstrument === 'baixo' && (
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                  Ativo
+                </span>
+              )}
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Contrabaixo (4/5 Cordas)</h3>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              Walking Bass no 2-5-1, arpejos de tríades e tétrades, e aproximação cromática para a fundamental.
+            </p>
+          </div>
+
+          {/* 4. Teclado */}
+          <div
+            onClick={() => onSelectInstrument && onSelectInstrument('teclado')}
+            className={`cursor-pointer rounded-xl p-4 border transition-all ${
+              stats.preferredInstrument === 'teclado'
+                ? 'bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50'
+                : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-lg">🎹</span>
+              {stats.preferredInstrument === 'teclado' && (
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                  Ativo
+                </span>
+              )}
+            </div>
+            <h3 className="text-sm font-bold text-slate-100">Teclado / Piano</h3>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              Mão esquerda no baixo, mão direita nas Notas Guia (3ª e 7ª), resolução suave por semitom.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Main Action Hub */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Next Lesson & Featured 2-5-1 Simulator */}
         <div className="lg:col-span-8 space-y-6">
+          {/* Item 5: Treino do Dia (Daily Practice Challenge) */}
+          <div className="bg-gradient-to-r from-amber-500/15 via-slate-900 to-slate-900 border border-amber-500/40 rounded-2xl p-6 space-y-4 shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
+                  <Sparkles className="w-4 h-4" />
+                  <span>TREINO DE HOJE</span>
+                </div>
+                <h3 className="text-lg font-black text-slate-100 flex items-center gap-2">
+                  <span>II – V – I em {stats.dailyPractice?.key || 'Eb'} Maior</span>
+                  <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+                    {stats.dailyPractice?.bpm || 70} BPM
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-300 mt-1">
+                  Meta diária: Praticar a cadência ({stats.dailyPractice?.progression?.join(' → ') || 'Fm7 → Bb7 → Ebmaj7'}) por {stats.dailyPractice?.durationMinutes || 10} minutos no metrônomo.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => audioSynth.playProgression([['F', 'Ab', 'C', 'Eb'], ['Bb', 'D', 'F', 'Ab'], ['Eb', 'G', 'Bb', 'D']], 70)}
+                  className="p-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded-xl border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  title="Ouvir progressão do dia"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>Ouvir</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onNavigate('laboratorio', stats.dailyPractice?.key || 'Eb')}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-md active:scale-95"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Praticar no Laboratório</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Current Lesson In Progress */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
@@ -320,6 +495,63 @@ export const Dashboard: React.FC<DashboardProps> = ({
             >
               Visualizar Certificado
             </button>
+          </div>
+
+          {/* Item 17: Domínio Musical & Repetição Espaçada */}
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                <BarChart3 className="w-4 h-4 text-amber-400" />
+                <span>Domínio Musical (Repetição Espaçada)</span>
+              </h4>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+                Média: 74%
+              </span>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              {[
+                { name: 'Campo Harmônico Maior', pct: 83, color: 'bg-emerald-400' },
+                { name: 'Formação de Acordes', pct: 78, color: 'bg-blue-400' },
+                { name: 'Progressão II - V - I', pct: 91, color: 'bg-amber-400' },
+                { name: 'Transposição de Tonalidade', pct: 60, color: 'bg-indigo-400' },
+                { name: 'Percepção & Ouvido', pct: 58, color: 'bg-rose-400' },
+              ].map((topic) => (
+                <div key={topic.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-slate-300 text-[11px]">
+                    <span>{topic.name}</span>
+                    <span className="font-mono font-bold">{topic.pct}%</span>
+                  </div>
+                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                    <div
+                      className={`${topic.color} h-full rounded-full transition-all`}
+                      style={{ width: `${topic.pct}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Smart Recommendation based on spaced repetition */}
+            <div className="bg-slate-950 p-3.5 rounded-xl border border-amber-500/30 space-y-2 mt-2">
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">
+                🎯 Próximo Treino Recomendado
+              </span>
+              <p className="text-xs text-slate-200 font-semibold">
+                Transposição em Mi Bemol (Eb) e Si Bemol (Bb)
+              </p>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                O algoritmo identificou menor índice de acertos nessas tonalidades com bemóis.
+              </p>
+              <button
+                type="button"
+                onClick={() => onNavigate('transposicao', JSON.stringify({ prog: ['Dm7', 'G7', 'Cmaj7'], fromKey: 'Eb' }))}
+                className="w-full py-1.5 px-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5"
+              >
+                <span>Treinar Agora em Eb</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Quick Tools Grid */}

@@ -19,16 +19,25 @@ import {
   Volume2,
   X,
   Disc,
+  FlaskConical,
+  Workflow,
+  Sparkles,
+  Users,
+  UserCheck,
 } from 'lucide-react';
 
 export type NavPage =
   | 'dashboard'
+  | 'laboratorio'
   | 'curso'
   | 'campo_harmonico'
   | 'escalas'
   | 'acordes'
   | 'progressoes'
   | '2-5-1'
+  | 'voice_leading'
+  | 'rearmonizador'
+  | 'instrumentos'
   | 'transposicao'
   | 'simulador'
   | 'exercicios'
@@ -39,7 +48,9 @@ export type NavPage =
   | 'configuracoes'
   | 'dicionario'
   | 'pratica'
-  | 'circulo_quintas';
+  | 'circulo_quintas'
+  | 'professor'
+  | 'perfil';
 
 interface SidebarProps {
   currentPage: NavPage;
@@ -58,20 +69,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems = [
     { id: 'dashboard' as NavPage, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'laboratorio' as NavPage, label: 'Laboratório Harmonia', icon: FlaskConical, highlight: true },
     { id: 'curso' as NavPage, label: 'Curso Completo', icon: GraduationCap },
+    { id: 'instrumentos' as NavPage, label: 'Os 4 Instrumentos', icon: Music2, highlight: true },
+    { id: '2-5-1' as NavPage, label: 'Especial 2-5-1', icon: Zap, highlight: true },
+    { id: 'voice_leading' as NavPage, label: 'Voice Leading & SubV', icon: Workflow },
+    { id: 'rearmonizador' as NavPage, label: 'Rearmonizador', icon: Sparkles },
     { id: 'campo_harmonico' as NavPage, label: 'Campo Harmônico', icon: Layers },
     { id: 'escalas' as NavPage, label: 'Escalas', icon: Music2 },
     { id: 'acordes' as NavPage, label: 'Acordes & Tríades', icon: KeyRound },
     { id: 'progressoes' as NavPage, label: 'Progressões', icon: GitBranch },
-    { id: '2-5-1' as NavPage, label: 'Especial 2-5-1', icon: Zap, highlight: true },
     { id: 'transposicao' as NavPage, label: 'Transposição', icon: ArrowRightLeft },
     { id: 'simulador' as NavPage, label: 'Simulador', icon: Cpu },
-    { id: 'exercicios' as NavPage, label: 'Exercícios', icon: PenTool },
+    { id: 'exercicios' as NavPage, label: 'Exercícios (Infinito/Ouvido)', icon: PenTool },
     { id: 'quiz' as NavPage, label: 'Quiz', icon: HelpCircle },
-    { id: 'treinamento' as NavPage, label: 'Treinamento', icon: Flame },
-    { id: 'progresso' as NavPage, label: 'Progresso & Certificado', icon: Award },
-    { id: 'anotacoes' as NavPage, label: 'Anotações', icon: BookMarked },
+    { id: 'treinamento' as NavPage, label: 'Treino do Dia & Espaçado', icon: Flame },
     { id: 'circulo_quintas' as NavPage, label: 'Círculo das Quintas', icon: Disc },
+    { id: 'professor' as NavPage, label: 'Painel do Professor', icon: Users },
+    { id: 'perfil' as NavPage, label: 'Perfil do Aluno', icon: UserCheck },
+    { id: 'progresso' as NavPage, label: 'Progresso & Metas', icon: Award },
+    { id: 'anotacoes' as NavPage, label: 'Anotações', icon: BookMarked },
     { id: 'dicionario' as NavPage, label: 'Dicionário Musical', icon: BookOpen },
     { id: 'configuracoes' as NavPage, label: 'Configurações', icon: Settings },
   ];

@@ -65,6 +65,65 @@ export type ScaleType =
   | 'pentatonic_minor'
   | 'blues';
 
+export type Instrument = 'violao' | 'guitarra' | 'baixo' | 'teclado';
+
+export type SoundTimbre = 'piano' | 'guitarra' | 'baixo' | 'pads' | 'orgao';
+
+export type GuitarTuning = 'standard' | 'drop_d' | 'dadgad' | 'half_step_down';
+
+export interface TopicMastery {
+  topic: string;
+  attempts: number;
+  correct: number;
+  percentage: number;
+}
+
+export interface KeyMastery {
+  key: string;
+  attempts: number;
+  correct: number;
+  percentage: number;
+  isMastered: boolean;
+}
+
+export interface WeeklyGoal {
+  id: string;
+  title: string;
+  current: number;
+  target: number;
+  unit: string;
+  completed: boolean;
+}
+
+export interface DailyPractice {
+  date: string;
+  key: string;
+  scale: string;
+  progression: string[];
+  progressionName: string;
+  bpm: number;
+  durationMinutes: number;
+  completed: boolean;
+}
+
+export interface TeacherStudent {
+  id: string;
+  name: string;
+  instrument: Instrument;
+  progressPercent: number;
+  exercisesDone: number;
+  accuracy: number;
+  lastActive: string;
+  weakKey: string;
+}
+
+export interface TeacherClass {
+  id: string;
+  name: string;
+  category: 'Iniciantes' | 'Intermediário' | 'Harmonia Jazz/Gospel';
+  students: TeacherStudent[];
+}
+
 export interface HarmonicField {
   key: string;
   scaleType: ScaleType;
@@ -84,6 +143,7 @@ export interface TwoFiveOneInfo {
     function: HarmonicFunction;
     pianoGuideVoicing: { bass: string; rightHand: string[] };
     guitarTab?: string;
+    bassLine?: { root: string; third: string; fifth: string; chromaticApproach: string };
   };
   V: {
     chord: string;
@@ -92,6 +152,7 @@ export interface TwoFiveOneInfo {
     function: HarmonicFunction;
     pianoGuideVoicing: { bass: string; rightHand: string[] };
     guitarTab?: string;
+    bassLine?: { root: string; third: string; fifth: string; chromaticApproach: string };
   };
   I: {
     chord: string;
@@ -100,6 +161,7 @@ export interface TwoFiveOneInfo {
     function: HarmonicFunction;
     pianoGuideVoicing: { bass: string; rightHand: string[] };
     guitarTab?: string;
+    bassLine?: { root: string; third: string; fifth: string; chromaticApproach: string };
   };
   secondaryDominant?: {
     chord: string;
@@ -110,6 +172,13 @@ export interface TwoFiveOneInfo {
     progression: string[];
     romanNumerals: string[];
   };
+}
+
+export interface InstrumentGuidance {
+  violao: string;
+  guitarra: string;
+  baixo: string;
+  teclado: string;
 }
 
 export interface Lesson {
@@ -127,6 +196,7 @@ export interface Lesson {
     instrument: string;
     instructions: string;
     chordsOrNotes?: string[];
+    instrumentDetails?: Partial<InstrumentGuidance>;
   };
   exercise: {
     question: string;
@@ -171,6 +241,11 @@ export interface StudentNote {
 
 export interface UserStats {
   studentName: string;
+  preferredInstrument: Instrument;
+  soundTimbre: SoundTimbre;
+  guitarTuning: GuitarTuning;
+  studentLevel: 'Iniciante' | 'Intermediário' | 'Avançado';
+  studentGoal: 'Jazz & Improvisação' | 'Gospel & Worship' | 'MPB & Bossa Nova' | 'Pop & Rock' | 'Harmonia Geral';
   completedLessonIds: string[];
   completedQuizIds: string[];
   exercisesAttempted: number;
@@ -186,6 +261,10 @@ export interface UserStats {
   darkMode: boolean;
   audioVolume: number;
   metronomeBpm: number;
+  topicMastery?: Record<string, { attempts: number; correct: number; percentage: number }>;
+  keyMastery?: Record<string, { attempts: number; correct: number; percentage: number; isMastered: boolean }>;
+  dailyPractice?: DailyPractice;
+  weeklyGoals?: WeeklyGoal[];
 }
 
 export interface Achievement {

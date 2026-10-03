@@ -7,16 +7,20 @@ import {
   get251,
 } from '../utils/musicTheory';
 import { audioSynth } from '../services/audioSynth';
-import { ScaleDegreeInfo } from '../types';
+import { ScaleDegreeInfo, Instrument } from '../types';
 import { PianoKeyboard } from '../components/PianoKeyboard';
+import { FretboardDiagram } from '../components/FretboardDiagram';
+import { BassFretboard } from '../components/BassFretboard';
 import { HarmonicFlowMap } from '../components/HarmonicFlowMap';
 
 interface CampoHarmonicoProps {
   onNavigateTo251?: (key: string) => void;
+  userInstrument?: Instrument;
 }
 
 export const CampoHarmonico: React.FC<CampoHarmonicoProps> = ({
   onNavigateTo251,
+  userInstrument = 'violao',
 }) => {
   const [selectedKey, setSelectedKey] = useState<string>('C');
   const [scaleType, setScaleType] = useState<
@@ -24,6 +28,15 @@ export const CampoHarmonico: React.FC<CampoHarmonicoProps> = ({
   >('major');
   const [activeChordIndex, setActiveChordIndex] = useState<number>(0);
   const [chordDisplayType, setChordDisplayType] = useState<'tetrad' | 'triad'>('tetrad');
+  const [instrumentView, setInstrumentView] = useState<'teclado' | 'violao' | 'guitarra' | 'baixo'>(
+    userInstrument || 'violao'
+  );
+
+  React.useEffect(() => {
+    if (userInstrument) {
+      setInstrumentView(userInstrument);
+    }
+  }, [userInstrument]);
 
   const field =
     scaleType === 'major'
@@ -276,7 +289,7 @@ export const CampoHarmonico: React.FC<CampoHarmonicoProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => audioSynth.playChordNotes(activeChord.notes, 1.8, true)}
@@ -296,20 +309,93 @@ export const CampoHarmonico: React.FC<CampoHarmonicoProps> = ({
                 <span>Ver II-V-I de {selectedKey}</span>
               </button>
             )}
+
+            {/* Instrument View Selector */}
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setInstrumentView('teclado')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  instrumentView === 'teclado'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🎹 Teclado
+              </button>
+              <button
+                type="button"
+                onClick={() => setInstrumentView('violao')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  instrumentView === 'violao'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🎸 Violão
+              </button>
+              <button
+                type="button"
+                onClick={() => setInstrumentView('guitarra')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  instrumentView === 'guitarra'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                ⚡ Guitarra
+              </button>
+              <button
+                type="button"
+                onClick={() => setInstrumentView('baixo')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  instrumentView === 'baixo'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                🎸 Baixo
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Visual Piano Keyboard */}
-        <div className="py-2">
-          <PianoKeyboard
-            highlightNotes={activeChord.notes}
-            bassNote={activeChord.root}
-            guideTones={{
-              third: activeChord.notes[1],
-              seventh: activeChord.notes[3],
-            }}
-          />
-        </div>
+        {/* Visual Instrument Component */}
+        {instrumentView === 'teclado' && (
+          <div className="py-2">
+            <PianoKeyboard
+              highlightNotes={activeChord.notes}
+              bassNote={activeChord.root}
+              guideTones={{
+                third: activeChord.notes[1],
+                seventh: activeChord.notes[3],
+              }}
+            />
+          </div>
+        )}
+
+        {instrumentView === 'violao' && (
+          <div className="flex justify-center py-2">
+            <FretboardDiagram chordName={activeChord.symbol} notes={activeChord.notes} instrument="violao" />
+          </div>
+        )}
+
+        {instrumentView === 'guitarra' && (
+          <div className="flex justify-center py-2">
+            <FretboardDiagram chordName={activeChord.symbol} notes={activeChord.notes} instrument="guitarra" />
+          </div>
+        )}
+
+        {instrumentView === 'baixo' && (
+          <div className="py-2">
+            <BassFretboard
+              chordName={activeChord.symbol}
+              rootNote={activeChord.root}
+              chordNotes={activeChord.notes}
+              stringsCount={4}
+            />
+          </div>
+        )}
       </div>
 
       {/* Harmonic Flow Map */}

@@ -3,6 +3,9 @@ import { Play, Pause, RotateCcw, Repeat, Activity, Volume2 } from 'lucide-react'
 import { KEY_LIST, get251 } from '../utils/musicTheory';
 import { audioSynth } from '../services/audioSynth';
 import { Metronome } from '../components/Metronome';
+import { PianoKeyboard } from '../components/PianoKeyboard';
+import { FretboardDiagram } from '../components/FretboardDiagram';
+import { BassFretboard } from '../components/BassFretboard';
 
 export const ModoPratica: React.FC = () => {
   const [selectedKey, setSelectedKey] = useState<string>('C');
@@ -10,6 +13,7 @@ export const ModoPratica: React.FC = () => {
   const [isLooping, setIsLooping] = useState<boolean>(true);
   const [activeStep, setActiveStep] = useState<number>(0);
   const [bpm, setBpm] = useState<number>(80);
+  const [practiceInstrument, setPracticeInstrument] = useState<'teclado' | 'violao' | 'guitarra' | 'baixo' | 'nenhum'>('teclado');
 
   const loopTimerRef = useRef<number | null>(null);
 
@@ -71,29 +75,60 @@ export const ModoPratica: React.FC = () => {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      {/* Key Quick Switcher */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Tonalidade de Estudo:
-        </span>
-        <div className="flex flex-wrap gap-1">
-          {KEY_LIST.map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => {
-                setSelectedKey(k);
-                setActiveStep(0);
-              }}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                selectedKey === k
-                  ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                  : 'bg-slate-800 text-slate-300 hover:text-slate-100'
-              }`}
-            >
-              {k}
-            </button>
-          ))}
+      {/* Key & Instrument Quick Switcher */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+            Tonalidade de Estudo:
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {KEY_LIST.map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => {
+                  setSelectedKey(k);
+                  setActiveStep(0);
+                }}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                  selectedKey === k
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+                    : 'bg-slate-800 text-slate-300 hover:text-slate-100'
+                }`}
+              >
+                {k}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Live Instrument Visualizer Selector */}
+        <div className="space-y-1 self-start sm:self-auto">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+            Seu Instrumento:
+          </span>
+          <div className="flex flex-wrap items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            {[
+              { id: 'teclado', label: '🎹 Teclado' },
+              { id: 'violao', label: '🎸 Violão' },
+              { id: 'guitarra', label: '⚡ Guitarra' },
+              { id: 'baixo', label: '🎸 Baixo' },
+              { id: 'nenhum', label: 'Apenas Acordes' },
+            ].map((inst) => (
+              <button
+                key={inst.id}
+                type="button"
+                onClick={() => setPracticeInstrument(inst.id as typeof practiceInstrument)}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                  practiceInstrument === inst.id
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {inst.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -140,6 +175,56 @@ export const ModoPratica: React.FC = () => {
             );
           })}
         </div>
+
+        {/* Live Synchronized Instrument Visualizer */}
+        {practiceInstrument !== 'nenhum' && (
+          <div className="relative z-10 p-4 bg-slate-950/70 border border-slate-800 rounded-2xl animate-in fade-in duration-150">
+            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block mb-2">
+              Digitação em Tempo Real ({chordSteps[activeStep].chord}):
+            </span>
+
+            {practiceInstrument === 'teclado' && (
+              <PianoKeyboard
+                highlightNotes={chordSteps[activeStep].notes}
+                bassNote={chordSteps[activeStep].notes[0]}
+                guideTones={{
+                  third: chordSteps[activeStep].notes[1],
+                  seventh: chordSteps[activeStep].notes[3],
+                }}
+                octaves={2}
+              />
+            )}
+
+            {practiceInstrument === 'violao' && (
+              <div className="flex justify-center">
+                <FretboardDiagram
+                  chordName={chordSteps[activeStep].chord}
+                  notes={chordSteps[activeStep].notes}
+                  instrument="violao"
+                />
+              </div>
+            )}
+
+            {practiceInstrument === 'guitarra' && (
+              <div className="flex justify-center">
+                <FretboardDiagram
+                  chordName={chordSteps[activeStep].chord}
+                  notes={chordSteps[activeStep].notes}
+                  instrument="guitarra"
+                />
+              </div>
+            )}
+
+            {practiceInstrument === 'baixo' && (
+              <BassFretboard
+                chordName={chordSteps[activeStep].chord}
+                rootNote={chordSteps[activeStep].notes[0]}
+                chordNotes={chordSteps[activeStep].notes}
+                stringsCount={4}
+              />
+            )}
+          </div>
+        )}
 
         {/* Control Action Buttons */}
         <div className="relative z-10 flex flex-wrap items-center justify-center gap-4 pt-4">

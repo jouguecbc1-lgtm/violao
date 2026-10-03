@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Volume2, KeyRound, Sparkles, ArrowRight } from 'lucide-react';
 import { KEY_LIST, noteToSemitone, semitoneToNote, getChordInversions } from '../utils/musicTheory';
+import { Instrument } from '../types';
 import { audioSynth } from '../services/audioSynth';
 import { PianoKeyboard } from '../components/PianoKeyboard';
 import { FretboardDiagram } from '../components/FretboardDiagram';
+import { BassFretboard } from '../components/BassFretboard';
 
 interface ChordFormulaType {
   suffix: string;
@@ -92,10 +94,22 @@ const CHORD_TYPES: ChordFormulaType[] = [
   },
 ];
 
-export const Acordes: React.FC = () => {
+interface AcordesProps {
+  userInstrument?: Instrument;
+}
+
+export const Acordes: React.FC<AcordesProps> = ({ userInstrument = 'violao' }) => {
   const [selectedRoot, setSelectedRoot] = useState<string>('C');
   const [selectedChordType, setSelectedChordType] = useState<ChordFormulaType>(CHORD_TYPES[4]); // Cmaj7 default
-  const [instrumentView, setInstrumentView] = useState<'piano' | 'violao'>('piano');
+  const [instrumentView, setInstrumentView] = useState<'teclado' | 'violao' | 'guitarra' | 'baixo'>(
+    userInstrument || 'violao'
+  );
+
+  React.useEffect(() => {
+    if (userInstrument) {
+      setInstrumentView(userInstrument);
+    }
+  }, [userInstrument]);
 
   const rootSemi = noteToSemitone(selectedRoot);
   const notes = selectedChordType.semitonesFromRoot.map((semi) =>
@@ -202,17 +216,17 @@ export const Acordes: React.FC = () => {
             <p className="text-xs text-slate-400 mt-1">{selectedChordType.description}</p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
             <button
               type="button"
-              onClick={() => setInstrumentView('piano')}
+              onClick={() => setInstrumentView('teclado')}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
-                instrumentView === 'piano'
+                instrumentView === 'teclado'
                   ? 'bg-amber-500 text-slate-950 font-bold'
-                  : 'bg-slate-800 text-slate-400'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Piano
+              🎹 Teclado
             </button>
             <button
               type="button"
@@ -220,10 +234,32 @@ export const Acordes: React.FC = () => {
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
                 instrumentView === 'violao'
                   ? 'bg-amber-500 text-slate-950 font-bold'
-                  : 'bg-slate-800 text-slate-400'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Violão
+              🎸 Violão
+            </button>
+            <button
+              type="button"
+              onClick={() => setInstrumentView('guitarra')}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                instrumentView === 'guitarra'
+                  ? 'bg-amber-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              ⚡ Guitarra
+            </button>
+            <button
+              type="button"
+              onClick={() => setInstrumentView('baixo')}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                instrumentView === 'baixo'
+                  ? 'bg-amber-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              🎸 Contrabaixo
             </button>
           </div>
         </div>
@@ -247,7 +283,7 @@ export const Acordes: React.FC = () => {
         </div>
 
         {/* Visual instrument component */}
-        {instrumentView === 'piano' ? (
+        {instrumentView === 'teclado' && (
           <div className="py-2">
             <PianoKeyboard
               highlightNotes={notes}
@@ -259,9 +295,28 @@ export const Acordes: React.FC = () => {
               octaves={2}
             />
           </div>
-        ) : (
+        )}
+
+        {instrumentView === 'violao' && (
           <div className="flex justify-center py-2">
-            <FretboardDiagram chordName={fullChordSymbol} notes={notes} />
+            <FretboardDiagram chordName={fullChordSymbol} notes={notes} instrument="violao" />
+          </div>
+        )}
+
+        {instrumentView === 'guitarra' && (
+          <div className="flex justify-center py-2">
+            <FretboardDiagram chordName={fullChordSymbol} notes={notes} instrument="guitarra" />
+          </div>
+        )}
+
+        {instrumentView === 'baixo' && (
+          <div className="py-2">
+            <BassFretboard
+              chordName={fullChordSymbol}
+              rootNote={selectedRoot}
+              chordNotes={notes}
+              stringsCount={4}
+            />
           </div>
         )}
       </div>
