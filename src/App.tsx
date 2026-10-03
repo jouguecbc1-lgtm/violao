@@ -35,6 +35,17 @@ import { Rearmonizador } from './pages/Rearmonizador';
 import { PainelProfessor } from './pages/PainelProfessor';
 import { PerfilAluno } from './pages/PerfilAluno';
 
+// Firebase & Auth
+import { AuthModal } from './components/AuthModal';
+import {
+  AuthUserProfile,
+  mapFirebaseUser,
+  loadUserStatsFromFirestore,
+  saveUserStatsToFirestore,
+  logoutUser,
+  onAuthUserChanged,
+} from './services/firebaseAuthService';
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState<NavPage>('dashboard');
   const [pageParam, setPageParam] = useState<string | undefined>(undefined);
@@ -42,7 +53,32 @@ export default function App() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isMetronomeFloatingOpen, setIsMetronomeFloatingOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUserProfile | null>(null);
   const [stats, setStats] = useState<UserStats>(getUserStats());
+
+  // Listen to Firebase Auth state
+  useEffect(() => {
+    const unsubscribe = onAuthUserChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        const profile = mapFirebaseUser(firebaseUser);
+        setCurrentUser(profile);
+        // Sync stats from Firestore
+        const remoteStats = await loadUserStatsFromFirestore(firebaseUser.uid);
+        if (remoteStats) {
+          setStats(remoteStats);
+          saveUserStats(remoteStats);
+        } else {
+          // New user: save initial stats to Firestore
+          await saveUserStatsToFirestore(firebaseUser.uid, stats, profile);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Listen for global shortcut Cmd+K / Ctrl+K
   useEffect(() => {
@@ -60,6 +96,11 @@ export default function App() {
     setStats(newStats);
     saveUserStats(newStats);
     audioSynth.setVolume(newStats.audioVolume);
+    if (currentUser) {
+      saveUserStatsToFirestore(currentUser.uid, newStats, currentUser).catch((err) => {
+        console.warn('Erro ao sincronizar com Firestore:', err);
+      });
+    }
   };
 
   const handleResetStats = () => {
@@ -103,9 +144,15 @@ export default function App() {
             handleUpdateStats({ ...stats, audioVolume: newVol });
           }}
           streakDays={stats.streakDays}
-          studentName={stats.studentName}
+          studentName={currentUser?.displayName || stats.studentName}
           preferredInstrument={stats.preferredInstrument}
           onSelectInstrument={(inst) => handleUpdateStats({ ...stats, preferredInstrument: inst })}
+          currentUser={currentUser}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onLogout={async () => {
+            await logoutUser();
+            setCurrentUser(null);
+          }}
         />
 
         {/* Floating Quick Metronome Panel */}
@@ -240,6 +287,12 @@ export default function App() {
               stats={stats}
               onUpdateStats={handleUpdateStats}
               onResetStats={handleResetStats}
+              currentUser={currentUser}
+              onOpenAuthModal={() => setIsAuthModalOpen(true)}
+              onLogout={async () => {
+                await logoutUser();
+                setCurrentUser(null);
+              }}
             />
           )}
 
@@ -281,6 +334,13 @@ export default function App() {
         isOpen={isCertificateOpen}
         onClose={() => setIsCertificateOpen(false)}
         stats={stats}
+      />
+
+      {/* Firebase Auth & Database Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialInstrument={stats.preferredInstrument}
       />
     </div>
   );

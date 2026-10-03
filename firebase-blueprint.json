@@ -1,0 +1,125 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile, harmonic preferences, and learning progress stats.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique user identifier corresponding to Firebase Auth UID."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the student or teacher."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Full name or musical display name."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Avatar URL."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["student", "teacher", "admin"],
+          "description": "Access level role in the course."
+        },
+        "preferredInstrument": {
+          "type": "string",
+          "enum": ["violao", "guitarra", "baixo", "teclado"],
+          "description": "Primary study instrument."
+        },
+        "studentLevel": {
+          "type": "string",
+          "description": "Skill level (Iniciante, Intermediário, Avançado)."
+        },
+        "studentGoal": {
+          "type": "string",
+          "description": "Musical focus (Jazz & Improvisação, Gospel & Worship, MPB & Bossa Nova, Pop & Rock, Harmonia Geral)."
+        },
+        "streakDays": {
+          "type": "number",
+          "description": "Consecutive days of practice."
+        },
+        "exercisesAttempted": {
+          "type": "number",
+          "description": "Total exercises performed."
+        },
+        "exercisesCorrect": {
+          "type": "number",
+          "description": "Total exercises answered correctly."
+        },
+        "quizScore": {
+          "type": "number",
+          "description": "Cumulative quiz points."
+        },
+        "totalTimeMinutes": {
+          "type": "number",
+          "description": "Total minutes spent practicing."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when account was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of last update."
+        }
+      },
+      "required": ["id", "email", "displayName"]
+    },
+    "StudentNote": {
+      "title": "StudentNote",
+      "description": "Personal theory notes created by student.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique note identifier."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of note."
+        },
+        "content": {
+          "type": "string",
+          "description": "Body text of note."
+        },
+        "category": {
+          "type": "string",
+          "description": "Topic category."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last edit timestamp."
+        },
+        "favorite": {
+          "type": "boolean",
+          "description": "Bookmarked status."
+        }
+      },
+      "required": ["id", "userId", "title", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profile, progress stats, and preferred instrument configuration."
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": "StudentNote",
+      "description": "Subcollection of personal theory notes belonging to a specific student."
+    }
+  }
+}

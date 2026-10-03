@@ -1,7 +1,8 @@
 import React from 'react';
-import { Menu, Search, Volume2, VolumeX, Flame, Activity } from 'lucide-react';
+import { Menu, Search, Volume2, VolumeX, Flame, Activity, LogIn, LogOut, Database, UserCheck } from 'lucide-react';
 import { NavPage } from './Sidebar';
 import { Instrument } from '../types';
+import { AuthUserProfile } from '../services/firebaseAuthService';
 
 interface NavbarProps {
   currentPage: NavPage;
@@ -14,6 +15,9 @@ interface NavbarProps {
   studentName: string;
   preferredInstrument?: Instrument;
   onSelectInstrument?: (instrument: Instrument) => void;
+  currentUser?: AuthUserProfile | null;
+  onOpenAuthModal?: () => void;
+  onLogout?: () => void;
 }
 
 const PAGE_TITLES: Record<NavPage, { title: string; subtitle: string }> = {
@@ -54,6 +58,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   studentName,
   preferredInstrument = 'violao',
   onSelectInstrument,
+  currentUser,
+  onOpenAuthModal,
+  onLogout,
 }) => {
   const pageInfo = PAGE_TITLES[currentPage] || { title: 'Harmonia 2-5-1', subtitle: 'Curso de Harmonia' };
 
@@ -155,13 +162,54 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="text-slate-400 hidden xl:inline">dias</span>
         </div>
 
-        {/* Student Avatar / Initials */}
-        <div
-          className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-bold text-xs shadow-sm"
-          title={studentName}
-        >
-          {studentName.charAt(0).toUpperCase()}
-        </div>
+        {/* Firebase Auth & Database status indicator */}
+        {currentUser ? (
+          <div className="flex items-center gap-1.5 pl-1 border-l border-slate-800">
+            <div
+              className="flex items-center gap-2 px-2.5 py-1 bg-slate-900 border border-emerald-500/30 rounded-xl"
+              title={`Logado como: ${currentUser.email || currentUser.displayName} (Sincronizado no Firestore)`}
+            >
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-[11px] font-bold text-slate-200 leading-none truncate max-w-[100px]">
+                  {currentUser.displayName || 'Aluno'}
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400 leading-none mt-0.5">
+                  Firestore Nuvem
+                </span>
+              </div>
+              <div
+                className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-bold text-xs shadow-sm ml-1"
+                title={currentUser.displayName || studentName}
+              >
+                {(currentUser.displayName || studentName).charAt(0).toUpperCase()}
+              </div>
+            </div>
+
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-900 rounded-lg transition-colors"
+                title="Desconectar / Sair da conta"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 pl-1 border-l border-slate-800">
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold rounded-xl transition-all shadow-md shadow-amber-500/20 active:scale-95"
+              title="Fazer Login ou Criar Conta para salvar no Firebase"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Entrar / Banco</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
