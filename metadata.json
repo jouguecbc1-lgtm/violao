@@ -1,0 +1,6 @@
+{
+  "name": "HARMONIA 2-5-1",
+  "description": "Curso completo de Campo Harmônico, Acordes, Funções Harmônicas e Progressão II-V-I com simuladores interativos e exercícios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
